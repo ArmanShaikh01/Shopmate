@@ -35,6 +35,8 @@
     ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "check_stock.ts",
+    "check_stock.js"
   ]
 }

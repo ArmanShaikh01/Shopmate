@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,7 +10,7 @@ import { Store, Loader2, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
-export default function LoginPage() {
+function LoginForm() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
@@ -166,7 +166,7 @@ export default function LoginPage() {
                             )}
                         </Button>
                         <div className="text-center text-sm text-slate-600">
-                            Don't have an account?{' '}
+                            Don&apos;t have an account?{' '}
                             <Link href="/signup" className="text-blue-600 hover:text-blue-700 font-bold">
                                 Sign Up
                             </Link>
@@ -175,5 +175,17 @@ export default function LoginPage() {
                 </form>
             </Card>
         </div>
+    )
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/20">
+                <Loader2 className="animate-spin text-blue-600" size={40} />
+            </div>
+        }>
+            <LoginForm />
+        </Suspense>
     )
 }

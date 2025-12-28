@@ -21,14 +21,14 @@ export function createClient() {
         set(name, value, options) {
           try {
             cookies().set({ name, value, ...options })
-          } catch (error) {
+          } catch {
             // Handle edge cases
           }
         },
         remove(name, options) {
           try {
             cookies().set({ name, value: '', ...options })
-          } catch (error) {
+          } catch {
             // Handle edge cases
           }
         },

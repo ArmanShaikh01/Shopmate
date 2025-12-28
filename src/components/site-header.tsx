@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
 import { signout } from '@/app/auth/actions'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
 
 export default function SiteHeader() {
-    const [user, setUser] = useState<any>(null)
+    const [user, setUser] = useState<SupabaseUser | null>(null)
     const [role, setRole] = useState<string | null>(null)
 
     useEffect(() => {

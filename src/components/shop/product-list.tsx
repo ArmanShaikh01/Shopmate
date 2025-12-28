@@ -6,8 +6,16 @@ import ProductCard from "./product-card"
 import { Input } from "@/components/ui/input"
 import { Search } from "lucide-react"
 
+interface Product {
+    id: string
+    name: string
+    category: string | null
+    price: number
+    stock_quantity: number
+}
+
 interface ProductListProps {
-    initialProducts: any[]
+    initialProducts: Product[]
     isLoggedIn: boolean
 }
 

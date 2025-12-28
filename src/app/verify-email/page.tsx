@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Mail, Loader2, CheckCircle } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 
-export default function VerifyEmailPage() {
+function VerifyEmailForm() {
     const [otp, setOtp] = useState('')
     const [loading, setLoading] = useState(false)
     const [resending, setResending] = useState(false)
@@ -136,5 +136,17 @@ export default function VerifyEmailPage() {
                 </CardContent>
             </Card>
         </div>
+    )
+}
+
+export default function VerifyEmailPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center min-h-screen bg-slate-50">
+                <Loader2 className="animate-spin text-blue-600" size={40} />
+            </div>
+        }>
+            <VerifyEmailForm />
+        </Suspense>
     )
 }
