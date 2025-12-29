@@ -23,7 +23,7 @@ export default async function ShopPage() {
 
     return (
         <div className="min-h-screen bg-slate-50">
-            <main className="container py-6 sm:py-12 max-w-4xl mx-auto px-4 sm:px-6">
+            <main className="container py-6 sm:py-12 max-w-4xl mx-auto px-4 sm:px-6 pb-6 sm:pb-28">
                 <div className="mb-8 sm:mb-10">
                     <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mb-2">
                         Shopping List
@@ -44,7 +44,7 @@ export default async function ShopPage() {
             <footer className="border-t py-8 sm:py-10 bg-white mt-12 sm:mt-16">
                 <div className="container text-center px-4">
                     <p className="text-xs sm:text-sm text-slate-400 font-medium">
-                        © 2024 Meri Dukan. All products sourced locally.
+                        © 2026 Meri Dukan. All products sourced locally.
                     </p>
                 </div>
             </footer>
