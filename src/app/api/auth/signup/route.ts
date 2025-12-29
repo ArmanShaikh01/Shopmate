@@ -33,7 +33,8 @@ export async function POST(request: NextRequest) {
             email_confirm: true,
             user_metadata: {
                 full_name: fullName,
-                phone: phone
+                phone: phone,
+                role: 'customer' // Store role in metadata for instant access
             }
         })
 

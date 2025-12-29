@@ -86,14 +86,13 @@ export default function SignupPage() {
             toast({
                 title: "Account Created! 🎉",
                 description: "Welcome to Meri Dukan! Redirecting to shop...",
-                duration: 3000,
+                duration: 2000,
             })
 
             // Fast client-side redirect
             setTimeout(() => {
                 router.push('/shop')
-                router.refresh()
-            }, 500)
+            }, 300)
 
         } catch (err: any) {
             setError('Something went wrong. Please try again.')

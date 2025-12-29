@@ -60,25 +60,21 @@ function LoginForm() {
             if (!user.email_confirmed_at) {
                 setError('Please verify your email first.')
                 router.push(`/verify-email?email=${encodeURIComponent(email)}`)
+                setLoading(false)
                 return
             }
 
-            // Get user role
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', user.id)
-                .single()
+            // Get role from user metadata (FAST - no database call!)
+            const userRole = user.user_metadata?.role || user.app_metadata?.role || 'customer'
 
-            const role = profile?.role || 'customer'
-
-            // Redirect based on role (INSTANT - no page reload!)
-            if (role === 'shopkeeper') {
+            // Instant redirect - no page reload needed!
+            if (userRole === 'shopkeeper') {
                 router.push('/admin/dashboard')
             } else {
                 router.push('/shop')
             }
-            router.refresh()
+
+            // Refresh happens automatically with router.push in Next.js 14
 
         } catch (err: any) {
             setError('Something went wrong. Please try again.')
