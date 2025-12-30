@@ -15,31 +15,46 @@ export default async function AdminDashboard() {
     const tomorrow = new Date(today)
     tomorrow.setDate(tomorrow.getDate() + 1)
 
-    const { data: todayOrders } = await supabase
-        .from('orders')
-        .select('id, total_amount')
-        .gte('created_at', today.toISOString())
-        .lt('created_at', tomorrow.toISOString())
-        .neq('status', 'cancelled')
-
-    const { data: allOrders } = await supabase
-        .from('orders')
-        .select('id, total_amount')
-        .neq('status', 'cancelled')
+    // Run all queries in parallel for better performance
+    const [
+        { data: todayOrders },
+        { data: allOrders }
+    ] = await Promise.all([
+        supabase
+            .from('orders')
+            .select('id, total_amount')
+            .gte('created_at', today.toISOString())
+            .lt('created_at', tomorrow.toISOString())
+            .neq('status', 'cancelled'),
+        supabase
+            .from('orders')
+            .select('id, total_amount')
+            .neq('status', 'cancelled')
+    ])
 
     const todayOrderIds = (todayOrders || []).map(o => o.id)
-    const { data: todayPayments } = todayOrderIds.length > 0 ? await supabase
-        .from('payments')
-        .select('order_id, amount')
-        .in('order_id', todayOrderIds)
-        .eq('status', 'completed') : { data: [] }
-
     const allOrderIds = (allOrders || []).map(o => o.id)
-    const { data: allPayments } = allOrderIds.length > 0 ? await supabase
-        .from('payments')
-        .select('order_id, amount')
-        .in('order_id', allOrderIds)
-        .eq('status', 'completed') : { data: [] }
+
+    // Fetch payments in parallel
+    const [
+        { data: todayPayments },
+        { data: allPayments }
+    ] = await Promise.all([
+        todayOrderIds.length > 0
+            ? supabase
+                .from('payments')
+                .select('order_id, amount')
+                .in('order_id', todayOrderIds)
+                .eq('status', 'completed')
+            : Promise.resolve({ data: [] }),
+        allOrderIds.length > 0
+            ? supabase
+                .from('payments')
+                .select('order_id, amount')
+                .in('order_id', allOrderIds)
+                .eq('status', 'completed')
+            : Promise.resolve({ data: [] })
+    ])
 
     let todayTotalOrders = 0
     let todayTotalDue = 0

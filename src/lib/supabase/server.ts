@@ -3,12 +3,9 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
 export function createClient() {
-  const isServer = typeof window === 'undefined'
-
-  // Use Service Role Key on server-side to bypass RLS for internal logic (Role checks, etc)
-  const supabaseKey = isServer
-    ? (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
-    : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  // Always use anon key for session-based authentication
+  // Service role key bypasses cookies and sessions
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,20 +13,24 @@ export function createClient() {
     {
       cookies: {
         get(name) {
-          return cookies().get(name)?.value
+          try {
+            return cookies().get(name)?.value
+          } catch {
+            return undefined
+          }
         },
         set(name, value, options) {
           try {
             cookies().set({ name, value, ...options })
           } catch {
-            // Handle edge cases
+            // Handle edge cases - cookies() might not be available in some contexts
           }
         },
         remove(name, options) {
           try {
             cookies().set({ name, value: '', ...options })
           } catch {
-            // Handle edge cases
+            // Handle edge cases - cookies() might not be available in some contexts
           }
         },
       },

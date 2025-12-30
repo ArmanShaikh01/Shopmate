@@ -56,25 +56,27 @@ function LoginForm() {
                 return
             }
 
-            // Check email confirmation
-            if (!user.email_confirmed_at) {
-                setError('Please verify your email first.')
-                router.push(`/verify-email?email=${encodeURIComponent(email)}`)
-                setLoading(false)
-                return
-            }
+            // Fetch role from profiles table (single optimized query)
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single()
 
-            // Get role from user metadata (FAST - no database call!)
-            const userRole = user.user_metadata?.role || user.app_metadata?.role || 'customer'
+            const userRole = profile?.role || 'customer'
 
-            // Instant redirect - no page reload needed!
+            // Refresh router to ensure session is established
+            router.refresh()
+
+            // Small delay to ensure cookies are set
+            await new Promise(resolve => setTimeout(resolve, 100))
+
+            // Client-side redirect
             if (userRole === 'shopkeeper') {
                 router.push('/admin/dashboard')
             } else {
                 router.push('/shop')
             }
-
-            // Refresh happens automatically with router.push in Next.js 14
 
         } catch (err: any) {
             setError('Something went wrong. Please try again.')
