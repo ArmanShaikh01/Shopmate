@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Minus, Plus, Package } from "lucide-react"
 import { useCart } from "@/components/providers/cart-provider"
 import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
 
 interface ProductCardProps {
     product: any
@@ -16,7 +17,20 @@ export default function ProductCard({ product, isLoggedIn }: ProductCardProps) {
 
     const cartItem = items.find((item) => item.id === product.id)
     const availableStock = product.stock_quantity - product.reserved_quantity
-    const totalPrice = cartItem ? (cartItem.quantity * product.price).toFixed(0) : 0
+
+    const [inputValue, setInputValue] = useState("")
+
+    // Calculate total price from input value for instant updates
+    const totalPrice = cartItem && inputValue ?
+        (parseFloat(inputValue || "0") * product.price).toFixed(2) :
+        cartItem ? (cartItem.quantity * product.price).toFixed(2) : 0
+
+    // Sync input value with cart quantity
+    useEffect(() => {
+        if (cartItem) {
+            setInputValue(cartItem.quantity.toString())
+        }
+    }, [cartItem?.quantity])
 
     const handleAction = (e: React.MouseEvent, action: () => void) => {
         e.preventDefault()
@@ -25,6 +39,52 @@ export default function ProductCard({ product, isLoggedIn }: ProductCardProps) {
             return
         }
         action()
+    }
+
+    const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value
+        // Allow empty, numbers, and decimal point
+        if (value === "" || /^\d*\.?\d*$/.test(value)) {
+            setInputValue(value)
+
+            // Update quantity in real-time if valid number
+            const numValue = parseFloat(value)
+            if (!isNaN(numValue) && numValue > 0) {
+                const clampedValue = Math.min(numValue, availableStock)
+                updateQuantity(product.id, clampedValue)
+            }
+        }
+    }
+
+    const handleQuantityBlur = () => {
+        if (!cartItem) return
+
+        const numValue = parseFloat(inputValue)
+
+        // If invalid or empty, reset to current quantity
+        if (isNaN(numValue) || inputValue === "" || numValue <= 0) {
+            setInputValue(cartItem.quantity.toString())
+            return
+        }
+
+        // Clamp to valid range and update
+        const clampedValue = Math.min(numValue, availableStock)
+        updateQuantity(product.id, clampedValue)
+        setInputValue(clampedValue.toString())
+    }
+
+    const handleIncrement = (e: React.MouseEvent) => {
+        e.preventDefault()
+        if (!cartItem) return
+        const newQty = Math.min(availableStock, cartItem.quantity + 1)
+        updateQuantity(product.id, newQty)
+    }
+
+    const handleDecrement = (e: React.MouseEvent) => {
+        e.preventDefault()
+        if (!cartItem) return
+        const newQty = Math.max(0, cartItem.quantity - 1)
+        updateQuantity(product.id, newQty)
     }
 
     return (
@@ -62,24 +122,23 @@ export default function ProductCard({ product, isLoggedIn }: ProductCardProps) {
                                     variant="ghost"
                                     size="icon"
                                     className="h-8 w-8 text-white hover:bg-white/20 rounded-full transition-all active:scale-90"
-                                    onClick={(e) => {
-                                        e.preventDefault()
-                                        updateQuantity(product.id, Math.max(0, cartItem.quantity - 1))
-                                    }}
+                                    onClick={handleDecrement}
                                 >
                                     <Minus className="w-4 h-4" />
                                 </Button>
-                                <span className="min-w-[2rem] text-center font-bold text-white text-base">
-                                    {cartItem.quantity}
-                                </span>
+                                <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={inputValue}
+                                    onChange={handleQuantityChange}
+                                    onBlur={handleQuantityBlur}
+                                    className="min-w-[2.5rem] max-w-[3rem] text-center font-bold text-white text-base bg-transparent border-none outline-none focus:bg-white/10 rounded px-1"
+                                />
                                 <Button
                                     variant="ghost"
                                     size="icon"
                                     className="h-8 w-8 text-white hover:bg-white/20 rounded-full transition-all active:scale-90"
-                                    onClick={(e) => {
-                                        e.preventDefault()
-                                        updateQuantity(product.id, Math.min(availableStock, cartItem.quantity + 1))
-                                    }}
+                                    onClick={handleIncrement}
                                 >
                                     <Plus className="w-4 h-4" />
                                 </Button>
@@ -144,24 +203,23 @@ export default function ProductCard({ product, isLoggedIn }: ProductCardProps) {
                                 variant="ghost"
                                 size="icon"
                                 className="h-7 w-7 text-white hover:bg-white/20 rounded-full transition-all active:scale-90"
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    updateQuantity(product.id, Math.max(0, cartItem.quantity - 1))
-                                }}
+                                onClick={handleDecrement}
                             >
                                 <Minus className="w-4 h-4" />
                             </Button>
-                            <span className="min-w-[2rem] text-center font-bold text-white text-base">
-                                {cartItem.quantity}
-                            </span>
+                            <input
+                                type="text"
+                                inputMode="decimal"
+                                value={inputValue}
+                                onChange={handleQuantityChange}
+                                onBlur={handleQuantityBlur}
+                                className="min-w-[2.5rem] max-w-[3rem] text-center font-bold text-white text-base bg-transparent border-none outline-none focus:bg-white/10 rounded px-1"
+                            />
                             <Button
                                 variant="ghost"
                                 size="icon"
                                 className="h-7 w-7 text-white hover:bg-white/20 rounded-full transition-all active:scale-90"
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    updateQuantity(product.id, Math.min(availableStock, cartItem.quantity + 1))
-                                }}
+                                onClick={handleIncrement}
                             >
                                 <Plus className="w-4 h-4" />
                             </Button>
